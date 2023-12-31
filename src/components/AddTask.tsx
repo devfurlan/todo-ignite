@@ -1,4 +1,5 @@
 import { ChangeEvent, FormEvent, useContext, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { ListItemsContext, ListTasksProps } from "../pages/Index";
 import { Button } from "./Button";
 import { Input } from "./Input";
@@ -15,7 +16,7 @@ export function AddTask() {
     setTimeout(() => {
       const tasksListFilteredByNewTask = tasks?.filter(
         (task) =>
-          task.title.toLowerCase().trim() === newTaskTyping.toLowerCase().trim()
+          task.item.toLowerCase().trim() === newTaskTyping.toLowerCase().trim()
       );
       if (tasksListFilteredByNewTask && tasksListFilteredByNewTask.length > 0) {
         event.target.classList.add("border-red");
@@ -45,7 +46,7 @@ export function AddTask() {
     event.preventDefault();
 
     const tasksListFilteredByNewTask = tasks?.filter(
-      (task) => task.title.toLowerCase().trim() === newTask.toLowerCase().trim()
+      (task) => task.item.toLowerCase().trim() === newTask.toLowerCase().trim()
     );
     if (
       !newTask ||
@@ -54,9 +55,11 @@ export function AddTask() {
       return;
     }
 
+    const id = uuidv4();
     const newTaskToAdd: ListTasksProps = {
-      title: newTask,
-      isDone: false,
+      id,
+      item: newTask,
+      status: 0,
     };
 
     handleAddTask(newTaskToAdd);

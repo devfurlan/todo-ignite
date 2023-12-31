@@ -5,12 +5,11 @@ import { ItemsCounters } from "../components/ItemsCounters";
 import { ProgressBarLine } from "../components/ProgressBarLine";
 import { Task } from "../components/Task";
 import { Empty } from "../components/Empty";
-import api from "../services/api";
 
 export interface ListTasksProps {
-  id?: string;
-  title: string;
-  isDone: boolean;
+  id: string;
+  item: string;
+  status: 0 | 1;
 }
 
 interface ListItemsContextType {
@@ -25,21 +24,26 @@ interface ListItemsContextType {
 export const ListItemsContext = createContext({} as ListItemsContextType);
 
 export function Index() {
+  const keyListLocalStorage = "aiLembrei__List";
+
   const [tasks, setTasks] = useState<ListTasksProps[]>([]);
 
   useEffect(() => {
-    api
-      .get("tasks")
-      .then((response) => setTasks(response.data))
-      .catch((err) => {
-        console.error("Ops! ocorreu um erro" + err);
-      });
+    const getTasksOfLocalStorage = JSON.parse(
+      localStorage.getItem(keyListLocalStorage) || "[]"
+    );
+
+    if (getTasksOfLocalStorage.length > 0) {
+      setTasks(getTasksOfLocalStorage);
+    }
   }, []);
 
-  async function handleAddTask(newListTasksToAdd: ListTasksProps) {
-    await api
-      .post("tasks", newListTasksToAdd)
-      .then((response) => setTasks((tasks) => [response.data, ...tasks]));
+  useEffect(() => {
+    localStorage.setItem(keyListLocalStorage, JSON.stringify(tasks));
+  }, [tasks]);
+
+  function handleAddTask(newListTasksToAction: ListTasksProps) {
+    setTasks((tasks) => [newListTasksToAction, ...tasks]);
   }
 
   function handleUpdateTasks(newListTasks: ListTasksProps[] | undefined) {
@@ -47,7 +51,7 @@ export function Index() {
   }
 
   const totalTasks = tasks.length;
-  const totalTasksCompleted = tasks.filter((task) => task.isDone).length;
+  const totalTasksCompleted = tasks.filter((task) => task.status === 1).length;
   const percentOfTasksCompleted = totalTasks
     ? Math.round((totalTasksCompleted / totalTasks) * 100)
     : 0;
